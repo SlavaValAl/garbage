@@ -95,6 +95,8 @@ node_id = args.get('node')
 assign_type = args.get('assign')
 
 response = cStringIO.StringIO()
+
+# get data from nailgun
 input_curl = pycurl.Curl()
 input_curl.setopt(input_curl.URL, "http://%s:8000/api/nodes/%i/interfaces" % (fuel_ip, node_id) )
 input_curl.setopt(input_curl.WRITEFUNCTION, response.write)
@@ -137,4 +139,10 @@ for ngname, ifaces in assign_mapping_list.iteritems():
 #reassign admin iface
 assign_iface('fuelweb_admin', iface_name_mapping(admin_dev))
 
-print json.dumps(node_interfaces_hash.values())
+#send data
+output_curl = pycurl.Curl()
+output_curl.setopt(pycurl.URL, "http://%s:8000/api/nodes/%i/interfaces" % (fuel_ip, node_id))
+output_curl.setopt(pycurl.HTTPHEADER, ['Accept: application/json'])
+output_curl.setopt(pycurl.POST, 1)
+output_curl.setopt(pycurl.POSTFIELDS, json.dumps(node_interfaces_hash.values()))
+output_curl.perform()
